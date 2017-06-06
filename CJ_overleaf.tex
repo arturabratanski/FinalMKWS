@@ -1,0 +1,157 @@
+\documentclass[a4paper]{article}
+\newcommand{\sepspace}{\vspace*{1em}}	
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{float}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Chapman - Jouguet detonation of hydrogen and oxygen}
+\author{Artur Abratanski}
+
+\begin{document}
+\maketitle
+
+
+% pierwsza sekcja
+\section{Introduction}\label{sec:intro}
+In this report one will find a study about Chapman - Jouguet detonation using mixture of oxygen and hydrogen. The results presented below were calculated in Shock and Detonation Toolbox. There will be few dependences presented, connected with pressure, temperature and concentration of fuel and oxidizer. Mechanism of gas used in this project is $wang_highT.cti$, it also used a couple of functions from SDToolbox.  
+\section{Mathematical model}\label{sec:model}
+The model of this project is based on very simple model of detonation, involving only one dimension. It was proposed by Chapman and Jouguet at the beginning of 20th century. It was based on 3 conservation laws presented below:
+
+Conservation law of mass
+\begin{equation}
+    \rho_0 w_0 = \rho_1 w_1
+\end{equation}
+Conservation law of momentum
+\begin{equation}
+    p_0 + \rho_0 w_0 u_0 =p_1 + \rho_1 w_1 u_1
+\end{equation}
+Conservation law of energy
+\begin{equation}
+    \frac{1}{2} w_0^2 + \frac{\kappa}{\kappa - 1} \frac{p_0}{\rho_0} = \frac{1}{2} w_1^2 + \frac{\kappa}{\kappa - 1} \frac{p_1}{\rho_1} + H
+\end{equation}
+
+Where:\\
+
+$\rho$ - density\\
+$w$ - velocity of shockwave \\
+$p$ - pressure\\
+$u$ - velocity of gas\\
+$H$ - heat of chemical reaction\\
+For states described before detonation index 0 were used, post detonation state were presented with 1 index. 
+\\
+\\
+H is a constant, which is programmed into Cantera. With this knowledge it simple to calculate other thermodynamic parameters.
+\clearpage
+\section{Program}
+\subsection{Source code}
+\
+\textbf{importing libraries, SDToolbox to solve model}\\
+$import\ matplotlib.pyplot\ as\ plt$\\
+$from\ SDToolbox\ import\ *$\\
+$from\ matplotlib.legend_handler\ import\ HandlerLine2D$\\
+
+\textbf{intro}\\
+$print "Author: Artur Abratanski"$\\
+$print "CJ\ detonation\ of\ oxygen\ and\ hydrogen"$\\
+
+\textbf{Input of starting parameters}\\
+$P1=101325.15; $\\
+$T1=273.15;$\\
+$mech = 'wang_highT.cti';$\\
+
+\textbf{number or calculating points}\\
+$n_h = 30$\\
+
+\textbf{creating space to store CJ speed, pressure, temperature and concentrations, density} \\
+$CJ=np.zeros(n_h)$  \\
+$P=np.zeros(n_h) $  \\  
+$T=np.zeros(n_h)  $   \\
+$CH=np.zeros(n_h) $ \\
+$CP=np.zeros(n_h)$\\
+$vcj=np.zeros(n_h)$\\
+
+\textbf{loop through points of calculations}\\
+$for\ k\ in\ range(n_h):$\\
+   \-\hspace{1 cm}   $c_h=.03*k+0.025    $\\
+   
+\textbf{input of mixture}\\
+  \-\hspace{1 cm}  $  q='H2:{0} O2:{1}'.format(c_h, 1-c_h) $\\
+  
+\textbf{calculation explosion speed}\\
+  \-\hspace{1 cm}  $  [cj_speed,R2] = CJspeed(P1, T1, q, mech, 0);   $ \\
+  
+\textbf{implementing model of gas}\\
+  \-\hspace{1 cm}  $  gas = PostShock_eq(cj_speed, P1, T1, q, mech)   $\\
+  
+\textbf{calculation of state after explosion}\\
+   \-\hspace{1 cm} $  P[k] = gas.P/101325.15$\\
+  \-\hspace{1 cm} $   T[k] = gas.T$\\
+  \-\hspace{1 cm}   $ CJ[k] = cj_speed  $\\
+  \-\hspace{1 cm}  $  CH[k] = c_h$\\
+  \-\hspace{1 cm}  $  vcj[k] = gas.density$\\
+   \-\hspace{1 cm} $  print\ k$\\
+
+\textbf{saving to files txt}\\
+$np.savetxt("p.txt", P, delimiter = ',')$\\
+$np.savetxt("t.txt", T, delimiter = ',')$\\
+$np.savetxt("cj.txt", CJ, delimiter = ',')$\\
+$np.savetxt("ro.txt", vcj, delimiter = ',')$\\
+\textbf{inform about finish}\\
+$print\ "finish"$\\
+\clearpage
+\section{Results}\label{sec:results}
+Boundary condition of mixture were:\\
+p = 101 235 Pa\\
+T = 273.15K\\
+
+
+Program iterated through percentage concentration of oxygen, with 30 points calculated for each parameter as pressure, temperature and speed of propagation. The part of oxidizer in mixture were from 6\% to 89\%. The plots presented below were made in Microsoft Office software and they are presenting changes of states within changes of pressure, temperature and fi. 
+
+\begin{figure}[H]
+\includegraphics[width=1\textwidth]{p_cj_.JPG}
+\caption{\label{fig:cj}Pressure increase with increasing speed behind shock wave. It reaches its maximum at $2,1$ MPa and starts to decrease with highest value of CJ velocity.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=1\textwidth]{t_cj_.JPG}
+\caption{\label{fig:p}Temperature has similar curve to previous chart, maximum value for 2700 m/s is 3700 K. Final temperature for highest velocity is 2600 K}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=1\textwidth]{fi_cj_.JPG}
+\caption{\label{fig:t}Fi value various form 0,2 to 1,6, it was calculated with standard algorithm. Velocity rises through whole spectrum of fraction, for maximum fi 1 it reaches 2650 m/s}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=1\textwidth]{ro_cj_.JPG}
+\caption{\label{fig:t}Density of compressed mixture is in brackets between 2,4 kg/m3 and 0,4 kg/m3. It decreases with increase of velocity, which has its maximum for this calculation at 3700 m/s}
+\end{figure}
+
+
+\section{Summary}\label{sec:summary}
+Temperature and pressure has its maximum for speed behind show wave. Velocities for their maxim are similar, 2800 m/s. For this speed gas reaches its highest parameters, taking chart with fi, it is value of 1,6. Density decreases steadily, there is small dip in 2000 m/s value. This report showed how various parameters change during Chapman Jouguet detonation. 
+
+
+\section{References}\label{sec:refs}
+
+
+[1] A. T. Troskolañski, Group 15. Mechanics of Fluids: Vocabulary of Mechanics, 2001
+
+[2] Cooper, Paul W, Explosives Engineering, 1996
+
+[3] Gieras M., Wybrane zagadnienia w zadaniach, Oficyna Wydawnicza Politechniki Warszawskiej, 2011
+
+
+
+\end{document}
